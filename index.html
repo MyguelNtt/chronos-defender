@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chronos Defender - Atualizado</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="screen-overlay"></div>
+
+        <button id="pause-btn" class="hidden" onclick="togglePause()">⏸</button>
+
+        <div id="level-select-screen" class="hidden">
+            <div class="level-select-card">
+                <div class="pause-title">ESCOLHER FASE</div>
+                <div class="level-select-buttons">
+                    <button id="level1-select-btn" class="btn" onclick="selectLevel(1)">FASE 1</button>
+                    <button id="level2-select-btn" class="btn" onclick="selectLevel(2)">FASE 2 🔒</button>
+                    <button id="level3-select-btn" class="btn" onclick="selectLevel(3)">FASE 3 🔒</button>
+                </div>
+                <button id="level-select-close-btn" class="btn btn-secondary">VOLTAR</button>
+            </div>
+        </div>
+
+        <div id="test-unlock-screen" class="test-unlock-screen hidden">
+            <div class="test-unlock-card">
+                <div class="pause-title">MODO DE TESTE</div>
+
+                <div class="test-section-title">Desbloqueio de fases:</div>
+                <label class="test-option"><input id="test-phase-2" type="checkbox" onchange="updateTestModeOptions(this.id)"> Fase 2</label>
+                <label class="test-option"><input id="test-phase-3" type="checkbox" onchange="updateTestModeOptions(this.id)"> Fase 3</label>
+
+                <div class="test-section-title test-progress-title">Progresso:</div>
+                <label class="test-option test-radio-option"><input id="test-reset-progress" name="test-progress-mode" type="checkbox" onchange="updateTestModeOptions(this.id)"> Reiniciar Progresso</label>
+
+                <div class="button-group">
+                    <button class="btn" onclick="applyTestUnlockSelection()">CONFIRMAR</button>
+                    <button class="btn btn-secondary" onclick="closeTestUnlockMenu()">VOLTAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="test-reset-confirm-screen" class="test-reset-confirm-screen hidden">
+            <div class="test-reset-confirm-card">
+                <div class="pause-title">REINICIAR PROGRESSO?</div>
+                <p>As Fases 2 e 3 ficarão bloqueadas novamente e o progresso atual será apagado.</p>
+                <div class="button-group">
+                    <button class="btn btn-reset-confirm" onclick="confirmResetGameProgress()">CONFIRMAR</button>
+                    <button class="btn btn-secondary" onclick="cancelResetGameProgress()">VOLTAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="test-feedback-screen" class="test-feedback-screen hidden">
+            <div class="test-feedback-card">
+                <div id="test-feedback-title" class="pause-title">MODO DE TESTE</div>
+                <p id="test-feedback-text"></p>
+                <button class="btn" onclick="closeTestFeedback()">OK</button>
+            </div>
+        </div>
+
+        <div id="planet-weapon-warning" class="planet-weapon-warning">PEGUE A ARMA PRIMEIRO</div>
+
+        <div id="pause-screen" class="hidden">
+            <div class="pause-card">
+                <div class="pause-title">JOGO PAUSADO</div>
+                <div class="button-group" style="flex-direction: column; gap: 15px;">
+                    <button class="btn" onclick="resumeGame()">CONTINUAR</button>
+                    <button class="btn" onclick="restartGameFromPause()">RESTAURAR NAVE</button>
+                    <button class="btn btn-secondary" onclick="goToHomeFromPause()">TELA INICIAL</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="objective-screen">
+            <div class="objective-card phase3-objective-card">
+                <div class="objective-title">OBJETIVO DA MISSÃO</div>
+                <canvas id="objective-weapon-icon" class="objective-weapon-icon" width="110" height="72" aria-hidden="true"></canvas>
+                <p class="objective-text">
+                    Colete no mínimo <span id="objective-target" class="objective-target">450 DIAMANTES ESPACIAIS</span><br>
+                    para estabilizar o salto e completar a jornada!
+                </p>
+            </div>
+            <div class="objective-skip-hint">(Aperte ESPAÇO ou clique em qualquer lugar para pular)</div>
+        </div>
+
+        <div id="start-screen" class="game-screen">
+            <div id="start-title" class="main-title">
+                CHRONOS<br>
+                <span>DEFENDER</span>
+            </div>
+            <div class="start-controls">
+                <button id="start-btn" class="btn" onclick="startIntroSequence()">COMEÇAR</button>
+                <button id="level-select-btn" class="btn btn-secondary" onclick="openLevelSelector()">ESCOLHER FASE</button>
+            </div>
+            <div style="height: 70px;"></div>
+        </div>
+
+        <div id="gameover-screen" class="game-screen hidden">
+            <div id="gameover-content" class="drop-down-anim compact-layout">
+                <div id="gameover-msg" class="status-container fade-in-element">
+                    <div class="status-title-header" style="color: #ff4444; text-shadow: 0 0 15px #ff0000;">SINAL PERDIDO</div>
+                    <p>O núcleo de energia foi destruído. Telemetria e comunicação permanentemente interrompidas.</p>
+                </div>
+
+                <div id="gameover-animated-score" class="score-display">0</div>
+
+                <div id="gameover-btns" class="button-group fade-in-element">
+                    <button id="gameover-btn" class="btn" onclick="restartGameWithFade()">RESTAURAR NAVE</button>
+                    <button class="btn btn-secondary" onclick="goToHomeWithFade()">TELA INICIAL</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="level-end-screen" class="game-screen hidden">
+            <div id="level-end-content" class="drop-down-anim compact-layout">
+                <div id="level-status-msg" class="status-container fade-in-element">
+                    <div id="status-header-title" class="status-title-header">RESULTADOS</div>
+                    <p id="status-body-text">Processando dados de extração...</p>
+                </div>
+
+                <div id="animated-score" class="score-display">0/450</div>
+
+                <div id="level-btns" class="button-group fade-in-element">
+                    <button id="level-next-btn" class="btn" onclick="handleLevelEndAction()">PROSSEGUIR</button>
+                    <button id="level-home-btn" class="btn btn-secondary" onclick="goToHomeWithFade()">TELA INICIAL</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="destruction-screen" class="game-screen hidden" style="background: transparent;">
+            <div id="destruction-content" class="hidden drop-down-anim compact-layout">
+                <div class="status-container">
+                    <div class="status-title-header" style="color: #ff4444; text-shadow: 0 0 15px #ff0000;">NÚMERO DE DIAMANTES INSUFICIENTES</div>
+                    <p style="margin-top: 15px;">A nave não obteve energia suficiente para suportar o pouso e estabilizar o sistema.</p>
+                </div>
+                <div class="button-group">
+                    <button class="btn" onclick="restartGameWithFade()">RECOMEÇAR</button>
+                    <button class="btn btn-secondary" onclick="goToHomeWithFade()">TELA INICIAL</button>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="spaceCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>
